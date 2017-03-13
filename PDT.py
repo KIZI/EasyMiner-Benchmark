@@ -11,10 +11,10 @@ f.write("dataset,accuracy\n")
 accFold=0.0
 for dataset in datasets.datasets:  
     for fold in range(0,10):
-        trainX=pd.read_csv("/home/tomas/Dropbox/KonferenceAakce/JMLR15_EM_my/eval_final/folds_nodiscr/train/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False).drop(dataset["targetvariablename"],1)
-        trainY=pd.read_csv("/home/tomas/Dropbox/KonferenceAakce/JMLR15_EM_my/eval_final/folds_nodiscr/train/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False, usecols=[dataset["targetvariablename"]])
-        testX=pd.read_csv("/home/tomas/Dropbox/KonferenceAakce/JMLR15_EM_my/eval_final/folds_nodiscr/test/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False).drop(dataset["targetvariablename"],1)
-        testY=pd.read_csv("/home/tomas/Dropbox/KonferenceAakce/JMLR15_EM_my/eval_final/folds_nodiscr/test/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False, usecols=[dataset["targetvariablename"]])
+        trainX=pd.read_csv("folds_nodiscr/train/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False).drop(dataset["targetvariablename"],1)
+        trainY=pd.read_csv("folds_nodiscr/train/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False, usecols=[dataset["targetvariablename"]])
+        testX=pd.read_csv("folds_nodiscr/test/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False).drop(dataset["targetvariablename"],1)
+        testY=pd.read_csv("folds_nodiscr/test/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False, usecols=[dataset["targetvariablename"]])
         clf = Pipeline([ ('dummyConv', DUMMY.ConvertCategoricalToDummies()),('autdectree', DECTREE.AutoTunedDecisionTreeClassifier())])
         clf.fit(trainX,trainY)
         prediction=clf.predict(trainY)
