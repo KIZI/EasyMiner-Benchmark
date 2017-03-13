@@ -22,15 +22,12 @@ data/output
 
 ###Running benchmarks - WEKA
 
-Weka implementations of reference algorithms  of the two benchmark suites are executed using
+Weka implementations of PART, J48 and RIPPER with grid-based metaparameter optimiziation  are executed using
 ```
 ./run_WEKA_Bench_Acc.sh
-./run_WEKA_Bench_Scaling.sh
 ```
-The output is stored into
-```
-/result
-```
+
+All benchmarks use raw, undiscretized data.
 ###Running benchmarks  - Python
 Sci-Kit decision tree benchmarks are run with  
 
@@ -38,10 +35,7 @@ Sci-Kit decision tree benchmarks are run with
 python PDT.py
 ```
 
-The output is stored into
-```
-/result
-```
+Uses raw, undiscretized data.
 
 ###Running benchmarks - EasyMiner
 
@@ -53,6 +47,8 @@ The default benchmark of the rCBA implementation in EasyMiner is run with
 python em_api.py
 ```
 By default, the benchmark runs in five parallel threads. This can be changed by modifying `PARALLEL_THREADS` variable in `em_api.py`.
+
+Uses discretized data.
 
 ###Generating won-tie-loss matrix
 The won-tie-loss matrix and Wilcoxon signed rank test are executed using:
