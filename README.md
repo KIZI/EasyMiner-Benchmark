@@ -55,10 +55,12 @@ python em_api.py
 By default, the benchmark runs in five parallel threads. This can be changed by modifying `PARALLEL_THREADS` variable in `em_api.py`.
 
 ###Generating won-tie-loss matrix
+The won-tie-loss matrix and Wilcoxon signed rank test are executed using:
+```
+python wontieloss.py
+```
+
 All benchmarks are saved into:
 ```
 /result
 ```
-
-The won-tie-loss matrix and Wilcoxon signed rank test are executed using `wontieloss.py`.
-The result is saved into the same folder. 
