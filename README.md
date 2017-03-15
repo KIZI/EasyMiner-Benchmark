@@ -20,6 +20,19 @@ The process also creates a temporary folder
 data/output
 ```
 
+Since this proces takes long, precomputed folds are shipped zipped in 
+```
+prepared_data
+```
+and can be unzipped with
+
+```
+unzipfolds.sh
+```
+
+
+
+
 ###Running benchmarks - WEKA
 
 Weka implementations of PART, J48 and RIPPER with grid-based metaparameter optimiziation  are executed using
@@ -28,6 +41,9 @@ Weka implementations of PART, J48 and RIPPER with grid-based metaparameter optim
 ```
 
 All benchmarks use raw, undiscretized data.
+
+If interrupted, running the file again will compute the missing results.
+
 ###Running benchmarks  - Python
 Sci-Kit decision tree benchmarks are run with  
 
@@ -36,6 +52,7 @@ python PDT.py
 ```
 
 Uses raw, undiscretized data.
+
 
 ###Running benchmarks - EasyMiner
 
@@ -49,6 +66,8 @@ python em_api.py
 By default, the benchmark runs in five parallel threads. This can be changed by modifying `PARALLEL_THREADS` variable in `em_api.py`.
 
 Uses discretized data.
+
+If interrupted, running the file again will compute the missing results.
 
 ###Generating won-tie-loss matrix
 The won-tie-loss matrix and Wilcoxon signed rank test are executed using:

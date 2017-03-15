@@ -204,8 +204,8 @@ def train_and_test():
             else:
                 write_lock(lock_file)
 
-            train = directory + os.sep + "folds" + os.sep + "train" + os.sep + dataset["filename"] + str(fold) + ".csv"
-            test = directory + os.sep + "folds" + os.sep + "test" + os.sep + dataset["filename"] + str(fold) + ".csv"
+            train = directory + os.sep + "data" + os.sep + "folds" + os.sep + "train" + os.sep + dataset["filename"] + str(fold) + ".csv"
+            test = directory + os.sep + "data" + os.sep + "folds" + os.sep + "test" + os.sep + dataset["filename"] + str(fold) + ".csv"
 
             if not (os.path.isfile(train) and os.path.isfile(test)):
                 # train or test CSV file is not available
@@ -231,7 +231,6 @@ def train_and_test():
 def process_results(resultsFile):
     output = open(resultsFile, "w")
     output.write("dataset,accuracy,rules\n");
-    # noinspection PyUnresolvedReferences
     for dataset in datasets.datasets:
         ruleCount = 0
         rowCount = 0
@@ -241,13 +240,19 @@ def process_results(resultsFile):
         accuracyAvg = 0
 
         datasetResultsFile = directory + os.sep + "tempresult" + os.sep + dataset["filename"] + ".summary.txt"
+        allExist=True
         for i in range(0, 10):
-            if not os.path.isfile(directory + os.sep + "tempresult" + os.sep + dataset["filename"] + str(i) + ".evalResult.json"):
+            resultFile = directory + os.sep + "tempresult" + os.sep + dataset["filename"] + str(i) + ".evalResult.json"
+            if not os.path.isfile(resultFile):
                 print("SKIPPED ROW: "+dataset["filename"])
-                continue
+                allExist=False
+                break
+        if not allExist:
+            continue           
         for i in range(0, 10):
-            jsonDataFile = open(
-                directory + os.sep + "tempresult" + os.sep + dataset["filename"] + str(i) + ".evalResult.json", "r")
+            resultFile = directory + os.sep + "tempresult" + os.sep + dataset["filename"] + str(i) + ".evalResult.json"
+
+            jsonDataFile = open(resultFile, "r")
             data = json.load(jsonDataFile)
             jsonDataFile.close()
             dataCorrect = int(data["correct"])
@@ -279,9 +284,9 @@ def process_results(resultsFile):
 
 
 
-print("Deleting previously computed result files")
-for result_file in os.listdir(directory + os.sep + "tempresult"):
-    os.remove(directory + os.sep + "tempresult" + os.sep + result_file)
+#print("Deleting previously computed result files")
+#for result_file in os.listdir(directory + os.sep + "tempresult"):
+#    os.remove(directory + os.sep + "tempresult" + os.sep + result_file)
 
 if __name__ == '__main__':
     processes = []

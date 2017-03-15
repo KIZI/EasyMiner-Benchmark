@@ -2,9 +2,9 @@ import pandas as pd
 from scipy.stats import  wilcoxon
 cols=["dataset","accuracy","optimized","time","numerical"]
 main="result/rCBA-accuracy.csv"
-other=[{"fname":"result/J48-accuracy.csv","friendly":"J48 auto"},{"fname":"result/PART-accuracy.csv","friendly":"PART auto"},{"fname":"result/RIPPER-accuracy.csv","friendly":"RIPPER auto"},{"fname":"result/PDT-accuracy.csv","friendly":"Python Decision Tree auto"}]
+other=[{"fname":"result/J48-accuracy.csv","friendly":"J48 auto"},{"fname":"result/PART-accuracy.csv","friendly":"PART auto"},{"fname":"result/JRip-accuracy.csv","friendly":"RIPPER auto"},{"fname":"result/PDT-accuracy.csv","friendly":"Python Decision Tree auto"}]
 df1=pd.read_csv(main,delimiter=",",index_col=False,engine="python")
-fo = open(main+".wontieloss", 'w')
+fo = open("result/rCBA-accuracy.wontieloss", 'w')
 fo.write('dataset &  cba won & tie  & loss & omitted & p \\\\\n')
 #number of rows in baseline with nan accuracy
 if df1.accuracy.isnull().any():
@@ -14,6 +14,7 @@ for f in other:
     #df2=pd.read_csv(f["fname"],delimiter=r"\s+&\s+",index_col=False,skipfooter=3,engine="python")	
     df2=pd.read_csv(f["fname"],delimiter=",",index_col=False,engine="python")
     df=pd.merge(df1, df2, how='inner', on="dataset",suffixes=('_cl1', '_cl2'))
+    df.accuracy_cl2=pd.to_numeric(df.accuracy_cl2)
     print ("xxxx")
     print (f)
     won=len(df[df.accuracy_cl1.round(2) > df.accuracy_cl2.round(2)])

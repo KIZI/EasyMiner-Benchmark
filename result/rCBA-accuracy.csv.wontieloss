@@ -1,5 +1,0 @@
-dataset &  cba won & tie  & loss & omitted & p \\
-J48 auto & 15 & 5& 16 & 0 & 0.65831 \\
-PART auto & 13 & 6& 16 & 1 & 0.42661 \\
-RIPPER auto & 16 & 5& 15 & 0 & 0.80592 \\
-Python Decision Tree auto & 36 & 0& 0 & 0 & 0.00000 \\

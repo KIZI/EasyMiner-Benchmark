@@ -18,7 +18,12 @@
  */
 package wekabench;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.regex.Pattern;
 import weka.classifiers.Evaluation;
 import weka.classifiers.meta.MultiSearch;
 import weka.classifiers.meta.multisearch.DefaultEvaluationMetrics;
@@ -44,9 +49,10 @@ public class MetaSearchEval {
       String path="";      
       String targetVariable=null;
       
-      String[] datasets =  {"anneal","australian","autos","breast-w","colic","credit-a","credit-g","diabetes","glass","heart-statlog","hepatitis","hypothyroid","ionosphere","iris","labor","letter","lymph","segment","sonar","spambase","vehicle","vowel"};    
-      String[] algorithms = {"J48","JRip","PART"};
+     
+      String[] datasets =  DataUtils.loadListOfDatasets("lib/datasets.py");
       
+      String[] algorithms = {"J48","JRip","PART"};
       
       if (args.length ==1)
       {
@@ -62,16 +68,37 @@ public class MetaSearchEval {
           path = args[0];
           algorithms = args[1].split(";");     
           datasets = args[2].split(";");     
-          targetVariable = args[3];          
+          targetVariable = args[3];    
+          if (targetVariable.equals(""))
+          {
+              targetVariable=null;
+          }
       }
       
     
      for (String algorithm : algorithms)
      {
-        PrintWriter writer = new PrintWriter(path+"result/" + algorithm + "-accuracy.csv", "UTF-8");
-        writer.println("dataset,accuracy,rules");
+        File resultFile = new File(path+"result/" + algorithm + "-accuracy.csv");
+        boolean initFile = false;
+        if (!resultFile.exists())
+        {
+            initFile=true;
+        }
+        //append
+        PrintWriter writer = new PrintWriter(new FileOutputStream(resultFile, true));
+        
+        if (initFile) 
+            writer.println("dataset,accuracy,rules");        
+                    
         for (String dataset : datasets)
         {
+            String resultFileContents = new String(Files.readAllBytes(resultFile.toPath()));
+            String regex="(?m)^"+dataset+",";
+            if (Pattern.compile(regex).matcher(resultFileContents).find())
+            {
+                System.out.println("Dataset "  + dataset + " already computed");
+                continue;
+            }
             if (dataset.equals("letter") & algorithm.equals("PART")) continue;
             double accSum=0;
             double ruleSum=0;
@@ -322,16 +349,5 @@ private static double[] multiSearchRIPPER(Instances train,Instances test) throws
     System.out.println("Accuracy:" + accuracy); 
     return new double[]{numRules,accuracy};    
 }
-private static void simpleFuria(Instances train,Instances test) throws Exception{  
-    FURIA cl = new FURIA();
-    Evaluation eval = new Evaluation(train);
-    
-    InputMappedClassifier imc = new InputMappedClassifier();
-    imc.setClassifier(cl);
-    imc.buildClassifier(train);
 
-    eval.evaluateModelOnce(imc, test.firstInstance());
-    eval.evaluateModel(imc, test);
-    System.out.println("Accuracy:"+eval.pctCorrect()/100);    
-    }
 }

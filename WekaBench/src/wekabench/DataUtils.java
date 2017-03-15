@@ -3,8 +3,13 @@ package wekabench;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
@@ -24,6 +29,18 @@ public class DataUtils {
         saver.writeBatch();
         
     }
+     public static  String[] loadListOfDatasets(String path) throws IOException, Exception{
+         String content = new String(Files.readAllBytes(Paths.get(path)));
+         ArrayList<String> datasets = new ArrayList();
+         Matcher m = Pattern.compile("\"filename\":\"(.*?)\"").matcher(content);         
+         while (m.find())
+         {
+             datasets.add(m.group(1));             
+         }
+         return datasets.toArray(new String[0]);
+    }
+
+         
     public static Instances loadData(String path,String targetVariable, ArrayList<Integer> attToRemove) throws IOException, Exception{
       
        CSVLoader loader = new CSVLoader();
