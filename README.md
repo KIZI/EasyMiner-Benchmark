@@ -1,7 +1,7 @@
 # marcbench
 Benchmark suite for EasyMiner
 
-##Preparing data
+## Preparing data
 Prerequisites include Python 2 with sci-kit learn and pandas.
 
  ```
@@ -33,7 +33,7 @@ unzipfolds.sh
 
 
 
-###Running benchmarks - WEKA
+### Running benchmarks - WEKA
 
 Weka implementations of PART, J48 and RIPPER with grid-based metaparameter optimiziation  are executed using
 ```
@@ -44,7 +44,7 @@ All benchmarks use raw, undiscretized data.
 
 If interrupted, running the file again will compute the missing results.
 
-###Running benchmarks  - Python
+### Running benchmarks  - Python
 Sci-Kit decision tree benchmarks are run with  
 
 ```
@@ -54,7 +54,7 @@ python PDT.py
 Uses raw, undiscretized data.
 
 
-###Running benchmarks - EasyMiner
+### Running benchmarks - EasyMiner
 
 First, it is necessary to input valid API_KEY and API_URL into `easyminercenter_api_config.py`
 
@@ -69,7 +69,7 @@ Uses discretized data.
 
 If interrupted, running the file again will compute the missing results.
 
-###Generating won-tie-loss matrix
+### Generating won-tie-loss matrix
 The won-tie-loss matrix and Wilcoxon signed rank test are executed using:
 ```
 python wontieloss.py
