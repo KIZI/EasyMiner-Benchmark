@@ -17,8 +17,8 @@ for dataset in datasets.datasets:
         testY=pd.read_csv("data/folds_nodiscr/test/" +  dataset["filename"]+str(fold)+".csv",delimiter=",",index_col=False, usecols=[dataset["targetvariablename"]])
         clf = Pipeline([ ('dummyConv', DUMMY.ConvertCategoricalToDummies()),('autdectree', DECTREE.AutoTunedDecisionTreeClassifier())])
         clf.fit(trainX,trainY)
-        prediction=clf.predict(trainY)
-        p=pd.DataFrame(data=prediction).values==trainY.values
+        prediction=clf.predict(testX)
+        p=pd.DataFrame(data=prediction).values==testY.values
         p = list(itertools.chain(*p))
         acc=sum(p)/(len(p)*1.0)
         accFold=accFold+acc
