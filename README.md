@@ -75,6 +75,9 @@ Uses discretized data.
 
 If interrupted, running the file again will compute the missing results.
 
+
+Note that `cba_a.sh` returns slightly different results in each execution due to time limits used in the optimization algorithm.
+
 ### Generating won-tie-loss matrix
 The won-tie-loss matrix and Wilcoxon signed rank test are executed using:
 ```
