@@ -3,27 +3,36 @@ import requests, json
 import pandas as pd
 import time
 import os
+import argparse
 
 # import definition of datasets
 from lib import datasets
 
 directory = os.getcwd()
 
-# TODO you have to input URL of the EasyMinerCenter API endpoint and your API KEY (generated in EasyMinerCenter UI)
-# you can modify the following lines, or create configuration file easyminercenter_api_config.py
-API_KEY = ''
-API_URL = ''
+parser = argparse.ArgumentParser()
 
-PARALLEL_THREADS=5
-# region TASK CONFIG
-AUTO_CONF_SUPP = False
-USE_CBA = True
-MAX_RULES_COUNT = 80000
+parser.add_argument('API_KEY', type=str,
+                    help='API_KEY', default='',nargs='?',const='')
+parser.add_argument('API_URL', type=str,
+                    help='API_URL',  nargs='?', const='',default='')
+parser.add_argument('AUTO_CONF_SUPP', type=bool,
+                    help='AUTO_CONF_SUPP',  nargs='?', const=False,default=False)
+parser.add_argument('MAX_RULES_COUNT', type=int,
+                    help='MAX_RULES_COUNT',  nargs='?', const=80000, default=80000)
+parser.add_argument('PARALLEL_THREADS', type=int,
+                    help='PARALLEL_THREADS',  nargs='?', const=5, default = 5)
+parser.add_argument('USE_CBA', type=bool,
+                    help='USE_CBA',  nargs='?', const=True, default=True)
+parser.add_argument('IM_CONF', type=float,
+                    help='IM_CONF',  nargs='?', const=0.5, default=0.5)
+parser.add_argument('IM_SUPP', type=float,
+                    help='IM_SUPP',  nargs='?', const=0.01, default=0.01)
+parser.add_argument('IM_AUTO_CONF_SUPP_MAX_RULE_LENGTH', type=float,
+                    help='IM_AUTO_CONF_SUPP_MAX_RULE_LENGTH',  nargs='?', const=5,default=5)
 
-IM_CONF = 0.5
-IM_SUPP = 0.01
-IM_AUTO_CONF_SUPP_MAX_RULE_LENGTH = 5
-# endregion TASK CONFIG
+args = parser.parse_args()
+
 
 if not os.path.exists("tempresult"):
     os.makedirs("tempresult")
@@ -33,19 +42,21 @@ if not os.path.exists("tempresult"):
 if os.path.isfile(os.curdir+os.sep+'easyminercenter_api_config.py'):
     # noinspection PyUnresolvedReferences
     from easyminercenter_api_config import *
-elif API_KEY == '' or API_URL == '':
-    print ("You need to specify API_KEY and API_URL")
+    args.API_KEY=API_KEY
+    args.API_URL=API_URL
+elif args.API_KEY == '' or args.API_URL == '':
+    print ("You need to specify args.API_KEY and args.API_URL")
     quit()
 #endregion import config from easyminercenter_api_config.py
 
 # region config check
-if (API_URL.endswith('/')):
-    API_URL.rstrip('/')
+if (args.API_URL.endswith('/')):
+    args.API_URL.rstrip('/')
 
-check_url = API_URL + '/auth?apiKey=' + API_KEY
+check_url = args.API_URL + '/auth?apiKey=' + args.API_KEY
 r = requests.get(check_url)
 if (r.status_code != 200):
-    print("You have to input valid API_KEY and URL of the EasyMinerCenter API endpoint!")
+    print("You have to input valid args.API_KEY and URL of the EasyMinerCenter API endpoint!")
     print(check_url)
     print(r.status_code)
     quit()
@@ -68,8 +79,8 @@ def api_call(train,test,dataset,fold,prediction_output_file):
         df = df.drop(dataset["id"], 1)
     # region step 1: create datasource
     headers = {"Accept": "application/json"}
-    print(API_URL + '/datasources?separator=%2C&encoding=utf8&type=limited&apiKey=' + API_KEY)
-    r = requests.post(API_URL + '/datasources?separator=%2C&encoding=utf8&type=limited&apiKey=' + API_KEY,
+    print(args.API_URL + '/datasources?separator=%2C&encoding=utf8&type=limited&apiKey=' + args.API_KEY)
+    r = requests.post(args.API_URL + '/datasources?separator=%2C&encoding=utf8&type=limited&apiKey=' + args.API_KEY,
                       files=files, headers=headers)
     print ("response code:" + str(r.status_code))
     datasource_id = r.json()["id"]
@@ -80,7 +91,7 @@ def api_call(train,test,dataset,fold,prediction_output_file):
     headers = {'Content-Type': 'application/json', "Accept": "application/json"}
     json_data = json.dumps(
         {"name": "test miner " + dataset["filename"], "type": "cloud", "datasourceId": datasource_id})
-    r = requests.post(API_URL + "/miners?apiKey=" + API_KEY, headers=headers, data=json_data.encode())
+    r = requests.post(args.API_URL + "/miners?apiKey=" + args.API_KEY, headers=headers, data=json_data.encode())
     miner_id = r.json()["id"]
     print("miner_id:" + str(miner_id))
     # endregion step 2: create miner
@@ -91,7 +102,7 @@ def api_call(train,test,dataset,fold,prediction_output_file):
         json_data = json.dumps(
             {"miner": miner_id, "name": col, "columnName": col, "specialPreprocessing": "eachOne"})
         print(json_data.encode())
-        r = requests.post(API_URL + "/attributes?apiKey=" + API_KEY, headers=headers, data=json_data.encode())
+        r = requests.post(args.API_URL + "/attributes?apiKey=" + args.API_KEY, headers=headers, data=json_data.encode())
         print("attribute creation response status code:" + str(r.status_code))
         if r.status_code != 201:
             break
@@ -109,7 +120,7 @@ def api_call(train,test,dataset,fold,prediction_output_file):
             antecedent.append({"attribute": attribute_name})
 
     task_config = {"miner": miner_id,
-                   "name": "Test task", "limitHits": MAX_RULES_COUNT,
+                   "name": "Test task", "limitHits": args.MAX_RULES_COUNT,
                    "IMs": [],
                    "specialIMs": [],
                    "antecedent": antecedent,
@@ -120,17 +131,17 @@ def api_call(train,test,dataset,fold,prediction_output_file):
                    ]
                    }
 
-    if AUTO_CONF_SUPP:
+    if args.AUTO_CONF_SUPP:
         task_config['IMs'].append({"name": "AUTO_CONF_SUPP"})
-        task_config['IMs'].append({"name": "RULE_LENGTH", "value": IM_AUTO_CONF_SUPP_MAX_RULE_LENGTH})
+        task_config['IMs'].append({"name": "RULE_LENGTH", "value": args.IM_AUTO_CONF_SUPP_MAX_RULE_LENGTH})
     else:
-        task_config['IMs'].append({"name": "CONF", "value": IM_CONF})
-        task_config['IMs'].append({"name": "SUPP", "value": IM_SUPP})
+        task_config['IMs'].append({"name": "CONF", "value": args.IM_CONF})
+        task_config['IMs'].append({"name": "SUPP", "value": args.IM_SUPP})
 
-    if USE_CBA:
+    if args.USE_CBA:
         task_config["specialIMs"].append({"name": "CBA"})
 
-    r = requests.post(API_URL + "/tasks/simple?apiKey=" + API_KEY, headers=headers,
+    r = requests.post(args.API_URL + "/tasks/simple?apiKey=" + args.API_KEY, headers=headers,
                       data=json.dumps(task_config).encode())
     print("create task response code:" + str(r.status_code))
     task_id = r.json()["id"]
@@ -139,19 +150,19 @@ def api_call(train,test,dataset,fold,prediction_output_file):
 
     # region step 5: task run
     # start task
-    r = requests.get(API_URL + "/tasks/" + str(task_id) + "/start?apiKey=" + API_KEY, headers=headers)
+    r = requests.get(args.API_URL + "/tasks/" + str(task_id) + "/start?apiKey=" + args.API_KEY, headers=headers)
     if r.status_code > 400:
         print("Task creation failed. Please try to modify the task config or try it later.")
         raise
 
     # check status task
 
-    r = requests.get(API_URL + "/tasks/" + str(task_id) + "/start?apiKey=" + API_KEY, headers=headers)
+    r = requests.get(args.API_URL + "/tasks/" + str(task_id) + "/start?apiKey=" + args.API_KEY, headers=headers)
     # task_id=r.json()["id"]
     while True:
         time.sleep(1)
         # check state
-        r = requests.get(API_URL + "/tasks/" + str(task_id) + "/state?apiKey=" + API_KEY, headers=headers)
+        r = requests.get(args.API_URL + "/tasks/" + str(task_id) + "/state?apiKey=" + args.API_KEY, headers=headers)
         task_state = r.json()
         print("task_state:" + task_state["state"] + ", import_state:" + task_state["importState"])
         if task_state["state"] == "solved" and task_state["importState"] == "done":
@@ -165,15 +176,15 @@ def api_call(train,test,dataset,fold,prediction_output_file):
     print("---proceed to evaluation---")
 
     # region step 6: create datasource from test
-    r = requests.post(API_URL + '/datasources?separator=%2C&encoding=utf8&type=limited&apiKey=' + API_KEY, files={("file", open(test, 'rb'))}, headers={"Accept": "application/json"})
+    r = requests.post(args.API_URL + '/datasources?separator=%2C&encoding=utf8&type=limited&apiKey=' + args.API_KEY, files={("file", open(test, 'rb'))}, headers={"Accept": "application/json"})
     test_datasource_id = r.json()["id"]
     print("test datasource_id:" + str(test_datasource_id))
     time.sleep(1)
     # endregion step 6: create datasource from test
 
     # region step 7: evaluation
-    uri = API_URL + "/evaluation/classification?scorer=easyMinerScorer&task=" + str(
-        task_id) + "&datasource=" + str(test_datasource_id) + "&apiKey=" + API_KEY
+    uri = args.API_URL + "/evaluation/classification?scorer=easyMinerScorer&task=" + str(
+        task_id) + "&datasource=" + str(test_datasource_id) + "&apiKey=" + args.API_KEY
     print("evaluation uri:" + uri)
     r = requests.get(uri, headers={"Accept": "application/json"})
     # endregion step 7: evaluation
@@ -290,7 +301,7 @@ def process_results(resultsFile):
 
 if __name__ == '__main__':
     processes = []
-    for i in range(0,PARALLEL_THREADS):
+    for i in range(0,args.PARALLEL_THREADS):
         p = Process(target=train_and_test)
         p.start()
         print("started process " + str(i))

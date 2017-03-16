@@ -58,12 +58,18 @@ Uses raw, undiscretized data.
 
 First, it is necessary to input valid API_KEY and API_URL into `easyminercenter_api_config.py`
 
-The default benchmark of the rCBA implementation in EasyMiner is run with 
+The default benchmark (cba_d) of the rCBA implementation in EasyMiner is run with 
 
 ```
-python em_api.py
+./cba_d.sh
 ```
-By default, the benchmark runs in five parallel threads. This can be changed by modifying `PARALLEL_THREADS` variable in `em_api.py`.
+The benchmark of auto-tuned CBA (cba_a) can be run with
+```
+./cba_a.sh
+```
+
+
+By default, the benchmarks run in five parallel threads. This can be changed by passing `PARALLEL_THREADS` command line option to `cba_d.sh` or `cba_a.sh`.
 
 Uses discretized data.
 
